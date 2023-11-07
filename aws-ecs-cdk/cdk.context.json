@@ -1,0 +1,64 @@
+{
+  "availability-zones:account=884588048908:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "vpc-provider:account=884588048908:filter.tag:Name=Default:region=us-east-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-03109182967c0f313",
+    "vpcCidrBlock": "172.31.0.0/16",
+    "ownerAccountId": "884588048908",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-05ef3c98876eca5c9",
+            "cidr": "172.31.80.0/20",
+            "availabilityZone": "us-east-1a",
+            "routeTableId": "rtb-073f7a4e67961291b"
+          },
+          {
+            "subnetId": "subnet-04e96a74ab5ef2165",
+            "cidr": "172.31.16.0/20",
+            "availabilityZone": "us-east-1b",
+            "routeTableId": "rtb-073f7a4e67961291b"
+          },
+          {
+            "subnetId": "subnet-0cebed00335882d14",
+            "cidr": "172.31.32.0/20",
+            "availabilityZone": "us-east-1c",
+            "routeTableId": "rtb-073f7a4e67961291b"
+          },
+          {
+            "subnetId": "subnet-0b9186e91bab9b002",
+            "cidr": "172.31.0.0/20",
+            "availabilityZone": "us-east-1d",
+            "routeTableId": "rtb-073f7a4e67961291b"
+          },
+          {
+            "subnetId": "subnet-075b87ae7863a411e",
+            "cidr": "172.31.48.0/20",
+            "availabilityZone": "us-east-1e",
+            "routeTableId": "rtb-073f7a4e67961291b"
+          },
+          {
+            "subnetId": "subnet-0ab8dfb594c4def88",
+            "cidr": "172.31.64.0/20",
+            "availabilityZone": "us-east-1f",
+            "routeTableId": "rtb-073f7a4e67961291b"
+          }
+        ]
+      }
+    ]
+  },
+  "security-group:account=884588048908:region=us-east-1:securityGroupId=sg-0a92485ead3e624ae": {
+    "securityGroupId": "sg-0a92485ead3e624ae",
+    "allowAllOutbound": false
+  }
+}
