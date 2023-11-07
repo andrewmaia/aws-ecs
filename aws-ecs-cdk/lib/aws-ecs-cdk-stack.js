@@ -10,21 +10,23 @@ class AwsEcsCdkStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
-    //Outros
-    const securityGroup = ec2.SecurityGroup.fromLookup(
-      this,
-      "Antiga-492",
-      "sg-0a92485ead3e624ae"
-    );
+    //VPC
+    const vpc = new ec2.Vpc(this, "TheVPC", {
+      ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/24"),
+    });
 
-    const defaultVpc = ec2.Vpc.fromLookup(this, "default-vpc", {
-      vpcName: "Default",
+    //Security Group
+    const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
+      vpc,
+      description: "Allow ssh access to ec2 instances",
+      securityGroupName: "SecurityGroupTest",
+      allowAllOutbound: true,
     });
 
     //Cluster
-    const cluster = new ecs.Cluster(this, "ClusterTeste", {
-      clusterName: "ClusterTeste",
-      vpc: defaultVpc,
+    const cluster = new ecs.Cluster(this, "Cluster", {
+      clusterName: "ClusterTest",
+      vpc: vpc,
       containerInsights: true,
       enableFargateCapacityProviders: true,
     });
