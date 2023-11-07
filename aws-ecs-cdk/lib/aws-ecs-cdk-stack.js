@@ -3,8 +3,7 @@
 const { Stack, Duration } = require("aws-cdk-lib");
 const ec2 = require("aws-cdk-lib/aws-ec2");
 const ecs = require("aws-cdk-lib/aws-ecs");
-const ecs_patterns = require("aws-cdk-lib/aws-ecs-patterns");
-const cw = require("aws-cdk-lib/aws-cloudwatch");
+const ecsPatterns = require("aws-cdk-lib/aws-ecs-patterns");
 
 class AwsEcsCdkStack extends Stack {
   constructor(scope, id, props) {
@@ -18,7 +17,6 @@ class AwsEcsCdkStack extends Stack {
     //Security Group
     const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
       vpc,
-      description: "Allow ssh access to ec2 instances",
       securityGroupName: "SecurityGroupTest",
       allowAllOutbound: true,
     });
@@ -58,7 +56,20 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Service
-    const service = new ecs.FargateService(this, "FargateService", {
+    const fargateLoadBalancedService =
+      new ecsPatterns.ApplicationLoadBalancedFargateService(this, "Service", {
+        cluster,
+        taskDefinition,
+        serviceName: "ServiceTest",
+        desiredCount: 2,
+        securityGroups: [securityGroup],
+        loadBalancerName: "application-lb-name",
+        minHealthyPercent: 100,
+        maxHealthyPercent: 200,
+        publicLoadBalancer: true,
+      });
+
+    /*const service = new ecs.FargateService(this, "FargateService", {
       cluster,
       taskDefinition,
       desiredCount: 1,
@@ -70,12 +81,13 @@ class AwsEcsCdkStack extends Stack {
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
       assignPublicIp: true,
-    });
+    });*/
 
-    const autoScale = service.autoScaleTaskCount({
+    const autoScale = fargateLoadBalancedService.service.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: 3,
     });
+
     autoScale.scaleOnCpuUtilization("CPUAutoscaling", {
       targetUtilizationPercent: 50,
       scaleInCooldown: Duration.seconds(30),
