@@ -10,6 +10,7 @@ class AwsEcsCdkStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
+    //Outros
     const securityGroup = ec2.SecurityGroup.fromLookup(
       this,
       "Antiga-492",
@@ -20,6 +21,7 @@ class AwsEcsCdkStack extends Stack {
       vpcName: "Default",
     });
 
+    //Cluster
     const cluster = new ecs.Cluster(this, "ClusterTeste", {
       clusterName: "ClusterTeste",
       vpc: defaultVpc,
@@ -27,6 +29,7 @@ class AwsEcsCdkStack extends Stack {
       enableFargateCapacityProviders: true,
     });
 
+    //Task Definition
     const taskDefinition = new ecs.FargateTaskDefinition(this, "TaskDef", {
       family: "taskDefinitionTeste",
       cpu: 256,
