@@ -56,7 +56,7 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Service
-    new ecs.FargateService(this, "FargateService", {
+    const service = new ecs.FargateService(this, "FargateService", {
       cluster,
       taskDefinition,
       desiredCount: 1,
@@ -68,6 +68,16 @@ class AwsEcsCdkStack extends Stack {
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
       assignPublicIp: true,
+    });
+
+    const autoScale = service.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: 3,
+    });
+    autoScale.scaleOnCpuUtilization("CPUAutoscaling", {
+      targetUtilizationPercent: 50,
+      scaleInCooldown: Duration.seconds(30),
+      scaleOutCooldown: Duration.seconds(30),
     });
   }
 }
