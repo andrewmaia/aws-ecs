@@ -10,35 +10,38 @@ class AwsEcsCdkStack extends Stack {
     super(scope, id, props);
 
     //VPC
-    const vpc = new ec2.Vpc(this, "TheVPC", {
+    const vpc = new ec2.Vpc(this, "VPC", {
+      vpcName: "VcpEcsTeste",
       ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/24"),
     });
 
     //Security Group
     const securityGroup = new ec2.SecurityGroup(this, "SecurityGroup", {
       vpc,
-      securityGroupName: "SecurityGroupTest",
+      securityGroupName: "SecurityGroupEcsTeste",
       allowAllOutbound: true,
     });
 
     //Cluster
     const cluster = new ecs.Cluster(this, "Cluster", {
-      clusterName: "ClusterTest",
+      clusterName: "ClusterEcsTeste",
       vpc: vpc,
       containerInsights: true,
-      enableFargateCapacityProviders: true,
     });
 
     //Task Definition
-    const taskDefinition = new ecs.FargateTaskDefinition(this, "TaskDef", {
-      family: "taskDefinitionTeste",
-      cpu: 256,
-      memoryLimitMiB: 512,
-    });
+    const taskDefinition = new ecs.FargateTaskDefinition(
+      this,
+      "TaskDefinition",
+      {
+        family: "TaskDefinitionEcsTeste",
+        cpu: 256,
+        memoryLimitMiB: 512,
+      }
+    );
 
     const container = taskDefinition.addContainer("web", {
-      containerName: "fargate-app",
-      cpu: 0,
+      containerName: "ContainerEcsTeste",
       essential: true,
       image: ecs.ContainerImage.fromRegistry(
         "public.ecr.aws/docker/library/httpd:latest"
@@ -57,17 +60,20 @@ class AwsEcsCdkStack extends Stack {
 
     //Service
     const fargateLoadBalancedService =
-      new ecsPatterns.ApplicationLoadBalancedFargateService(this, "Service", {
-        cluster,
-        taskDefinition,
-        serviceName: "ServiceTest",
-        desiredCount: 2,
-        securityGroups: [securityGroup],
-        loadBalancerName: "application-lb-name",
-        minHealthyPercent: 100,
-        maxHealthyPercent: 200,
-        publicLoadBalancer: true,
-      });
+      new ecsPatterns.ApplicationLoadBalancedFargateService(
+        this,
+        "EcsService",
+        {
+          cluster,
+          taskDefinition,
+          serviceName: "ServiceEcsTeste",
+          desiredCount: 2,
+          securityGroups: [securityGroup],
+          loadBalancerName: "LoadBalancerEcsTeste",
+          minHealthyPercent: 100,
+          maxHealthyPercent: 200,
+        }
+      );
 
     /*const service = new ecs.FargateService(this, "FargateService", {
       cluster,
@@ -84,8 +90,8 @@ class AwsEcsCdkStack extends Stack {
     });*/
 
     const autoScale = fargateLoadBalancedService.service.autoScaleTaskCount({
-      minCapacity: 1,
-      maxCapacity: 3,
+      minCapacity: 2,
+      maxCapacity: 4,
     });
 
     autoScale.scaleOnCpuUtilization("CPUAutoscaling", {
