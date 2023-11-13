@@ -3,6 +3,7 @@
 const { Stack, Duration } = require("aws-cdk-lib");
 const ec2 = require("aws-cdk-lib/aws-ec2");
 const ecs = require("aws-cdk-lib/aws-ecs");
+const cdk = require("aws-cdk-lib/core");
 const ecsPatterns = require("aws-cdk-lib/aws-ecs-patterns");
 
 class AwsEcsCdkStack extends Stack {
@@ -98,6 +99,10 @@ class AwsEcsCdkStack extends Stack {
       targetUtilizationPercent: 50,
       scaleInCooldown: Duration.seconds(30),
       scaleOutCooldown: Duration.seconds(30),
+    });
+
+    new cdk.CfnOutput(this, "Url do loadbalancer para acessar site", {
+      value: fargateLoadBalancedService.loadBalancer.loadBalancerDnsName,
     });
   }
 }
