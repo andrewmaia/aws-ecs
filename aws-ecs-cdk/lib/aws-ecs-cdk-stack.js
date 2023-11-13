@@ -4,6 +4,7 @@ const { Stack, Duration } = require("aws-cdk-lib");
 const ec2 = require("aws-cdk-lib/aws-ec2");
 const ecs = require("aws-cdk-lib/aws-ecs");
 const cdk = require("aws-cdk-lib/core");
+const iam = require("aws-cdk-lib/aws-iam");
 const ecsPatterns = require("aws-cdk-lib/aws-ecs-patterns");
 
 class AwsEcsCdkStack extends Stack {
@@ -31,6 +32,26 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Task Definition
+    const ecsTaskExecutionRole = new iam.Role(this, "Role", {
+      roleName: "EcsTaskExecutionRoleEcsTeste",
+      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+    });
+
+    ecsTaskExecutionRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: ["*"],
+        actions: [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+      })
+    );
+
     const taskDefinition = new ecs.FargateTaskDefinition(
       this,
       "TaskDefinition",
@@ -38,6 +59,7 @@ class AwsEcsCdkStack extends Stack {
         family: "TaskDefinitionEcsTeste",
         cpu: 256,
         memoryLimitMiB: 512,
+        executionRole: ecsTaskExecutionRole,
       }
     );
 
@@ -45,11 +67,11 @@ class AwsEcsCdkStack extends Stack {
       containerName: "ContainerEcsTeste",
       essential: true,
       image: ecs.ContainerImage.fromRegistry(
-        "public.ecr.aws/docker/library/httpd:latest"
+        "884588048908.dkr.ecr.us-east-1.amazonaws.com/ecsteste:latest"
       ),
       entryPoint: ["sh", "-c"],
       command: [
-        '/bin/sh -c "echo $(hostname -i) >  /usr/local/apache2/htdocs/index.html && httpd-foreground"',
+        '/bin/sh -c "echo $(hostname -i) >  /var/www/html/ipadress.txt && apache2-foreground"',
       ],
     });
 
@@ -101,7 +123,7 @@ class AwsEcsCdkStack extends Stack {
       scaleOutCooldown: Duration.seconds(30),
     });
 
-    new cdk.CfnOutput(this, "Url do loadbalancer para acessar site", {
+    new cdk.CfnOutput(this, "UrlLoadbalancerAcessarSite", {
       value: fargateLoadBalancedService.loadBalancer.loadBalancerDnsName,
     });
   }
