@@ -5,6 +5,7 @@ const ec2 = require("aws-cdk-lib/aws-ec2");
 const ecs = require("aws-cdk-lib/aws-ecs");
 const cdk = require("aws-cdk-lib/core");
 const iam = require("aws-cdk-lib/aws-iam");
+const ecr = require("aws-cdk-lib/aws-ecr");
 const ecsPatterns = require("aws-cdk-lib/aws-ecs-patterns");
 
 class AwsEcsCdkStack extends Stack {
@@ -67,11 +68,11 @@ class AwsEcsCdkStack extends Stack {
       containerName: "ContainerEcsTeste",
       essential: true,
       image: ecs.ContainerImage.fromRegistry(
-        "884588048908.dkr.ecr.us-east-1.amazonaws.com/ecsteste:latest"
+        "public.ecr.aws/docker/library/httpd:latest"
       ),
       entryPoint: ["sh", "-c"],
       command: [
-        '/bin/sh -c "echo $(hostname -i) >  /var/www/html/ipadress.txt && apache2-foreground"',
+        '/bin/sh -c "echo $(hostname -i) >  /usr/local/apache2/htdocs/index.html && httpd-foreground"',
       ],
     });
 
@@ -125,6 +126,15 @@ class AwsEcsCdkStack extends Stack {
 
     new cdk.CfnOutput(this, "UrlLoadbalancerAcessarSite", {
       value: fargateLoadBalancedService.loadBalancer.loadBalancerDnsName,
+    });
+
+    ////////////****Pipeline*******////////////////
+
+    //Repository
+    const repository = new ecr.Repository(this, "ECR Repository", {
+      repositoryName: "ecr-teste-repository",
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      imageTagMutability: ecr.TagMutability.IMMUTABLE,
     });
   }
 }
