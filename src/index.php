@@ -7,7 +7,7 @@
     <title>Teste ECS</title>
   </head>
 
-  <body style="background-color: green">
+  <body style="background-color: red">
     Olá! Eu sou o container de IP:
     <?php
       $myfile = fopen("ipadress.txt", "r") or die("Unable to open file!");
