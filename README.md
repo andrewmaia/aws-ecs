@@ -1,7 +1,7 @@
 <!-- @format -->
 
-## Para subir o projeto na AWS rode o script powershell 'gerarImagem.ps1':
+## Para subir o projeto na AWS rode o script powershell 'publicar.ps1':
 
 ```bash
-& ".\gerarImagem.ps1"
+& ".\publicar.ps1"
 ```
