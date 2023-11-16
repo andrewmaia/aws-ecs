@@ -1,6 +1,7 @@
 /** @format */
 
 const { Stack, Duration } = require("aws-cdk-lib");
+const s3 = require("aws-cdk-lib/aws-s3");
 const ec2 = require("aws-cdk-lib/aws-ec2");
 const ecs = require("aws-cdk-lib/aws-ecs");
 const cdk = require("aws-cdk-lib/core");
@@ -33,7 +34,7 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Task Definition
-    const ecsTaskExecutionRole = new iam.Role(this, "Role", {
+    const ecsTaskExecutionRole = new iam.Role(this, "EcsTaskExecutionRole", {
       roleName: "EcsTaskExecutionRoleEcsTeste",
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
     });
@@ -128,14 +129,105 @@ class AwsEcsCdkStack extends Stack {
       value: fargateLoadBalancedService.loadBalancer.loadBalancerDnsName,
     });
 
-    ////////////****Pipeline*******////////////////
-
     //Repository
     const repository = new ecr.Repository(this, "ECR Repository", {
-      repositoryName: "RepositoryEcsTeste",
+      repositoryName: "repositoryecsteste",
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       imageTagMutability: ecr.TagMutability.IMMUTABLE,
     });
+
+    ////////////****Pipeline*******////////////////
+
+    //ArtifactBucket
+    const artifactBucket = new s3.Bucket(this, "Bucket", {
+      bucketName: "artifactbucketecsteste",
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    //Codebuild
+    const codeBuildServiceRole = new iam.Role(this, "CodeBuildServiceRole", {
+      roleName: "CodeBuildServiceRoleEcsTeste",
+      assumedBy: new iam.ServicePrincipal("codebuild.amazonaws.com"),
+    });
+
+    codeBuildServiceRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: ["*"],
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "ecr:GetAuthorizationToken",
+        ],
+      })
+    );
+
+    codeBuildServiceRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: [repository.repositoryArn],
+        actions: ["s3:GetObject", "s3:PutObject", "s3:GetObjectVersion"],
+      })
+    );
+
+    codeBuildServiceRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: [repository.repositoryArn],
+        actions: [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+        ],
+      })
+    );
+
+    //Pipeline
+
+    const codePipelineServiceRole = new iam.Role(
+      this,
+      "CodePipelineServiceRole",
+      {
+        roleName: "CodePipelineServiceRoleEcsTeste",
+        assumedBy: new iam.ServicePrincipal("codepipeline.amazonaws.com"),
+      }
+    );
+
+    codeBuildServiceRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: [repository.repositoryArn],
+        actions: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:GetObjectVersion",
+          "s3:GetBucketVersioning",
+        ],
+      })
+    );
+
+    codeBuildServiceRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: ["*"],
+        actions: [
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition",
+          "ecs:DescribeTasks",
+          "ecs:ListTasks",
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService",
+          "codebuild:StartBuild",
+          "codebuild:BatchGetBuilds",
+          "iam:PassRole",
+        ],
+      })
+    );
   }
 }
 
