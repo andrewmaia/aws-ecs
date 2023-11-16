@@ -8,6 +8,7 @@ const cdk = require("aws-cdk-lib/core");
 const iam = require("aws-cdk-lib/aws-iam");
 const ecr = require("aws-cdk-lib/aws-ecr");
 const ecsPatterns = require("aws-cdk-lib/aws-ecs-patterns");
+const codebuild = require("aws-cdk-lib/aws-codebuild");
 
 class AwsEcsCdkStack extends Stack {
   constructor(scope, id, props) {
@@ -185,6 +186,54 @@ class AwsEcsCdkStack extends Stack {
           "ecr:CompleteLayerUpload",
         ],
       })
+    );
+
+    const codebuildProject = new codebuild.PipelineProject(
+      this,
+      "CodeBuildProject",
+      {
+        projectName: "CodeBuildProjectEcsTeste",
+        role: codeBuildServiceRole,
+
+        buildSpec: codebuild.BuildSpec.fromObject({
+          version: "0.2",
+          phases: {
+            install: {
+              runtime_versions: "python: 3.11",
+              commands: [
+                "pip install --upgrade pip",
+                "pip install --upgrade awscli aws-sam-cli",
+              ],
+            },
+            pre_build: {
+              commands: [
+                "$(aws ecr get-login --no-include-email)",
+                'TAG="$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"',
+                'IMAGE_URI="${REPOSITORY_URI}:${TAG}"',
+              ],
+            },
+            build: {
+              commands: ['docker build --tag "$IMAGE_URI"'],
+            },
+            post_build: {
+              commands: ['docker push "$IMAGE_URI"'],
+              commands: [
+                'printf \'[{"name":"ContainerEcsTeste","imageUri":"%s"}]\' "$IMAGE_URI" > images.json',
+              ],
+            },
+          },
+          artifacts: { files: "images.json" },
+        }),
+        environment: {
+          computeType: codebuild.ComputeType.SMALL,
+          buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_5,
+          privileged: true,
+        },
+        environmentVariables: {
+          AWS_DEFAULT_REGION: { value: cdk.Stack.of(this).region },
+          REPOSITORY_URI: { value: repository.repositoryUri },
+        },
+      }
     );
 
     //Pipeline
