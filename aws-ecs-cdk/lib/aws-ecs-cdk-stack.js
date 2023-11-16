@@ -132,7 +132,7 @@ class AwsEcsCdkStack extends Stack {
 
     //Repository
     const repository = new ecr.Repository(this, "ECR Repository", {
-      repositoryName: "ecr-teste-repository",
+      repositoryName: "RepositoryEcsTeste",
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       imageTagMutability: ecr.TagMutability.IMMUTABLE,
     });
