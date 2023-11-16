@@ -9,6 +9,7 @@ const iam = require("aws-cdk-lib/aws-iam");
 const ecr = require("aws-cdk-lib/aws-ecr");
 const ecsPatterns = require("aws-cdk-lib/aws-ecs-patterns");
 const codebuild = require("aws-cdk-lib/aws-codebuild");
+const elb = require("aws-cdk-lib/aws-elasticloadbalancing");
 
 class AwsEcsCdkStack extends Stack {
   constructor(scope, id, props) {
@@ -85,6 +86,43 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Service
+    /*const fargateLoadBalancedService =
+      new ecsPatterns.ApplicationMultipleTargetGroupsFargateService(
+        this,
+        "EcsService",
+        {
+          cluster,
+          taskDefinition,
+          serviceName: "ServiceEcsTeste",
+          desiredCount: 2,
+          securityGroups: [securityGroup],
+          minHealthyPercent: 100,
+          maxHealthyPercent: 200,
+          deploymentController: {
+            type: ecs.DeploymentControllerType.CODE_DEPLOY,
+          },
+          loadBalancers: [
+            {
+              name: "LoadBalancerEcsTeste",
+              listeners: [
+                { name: "listener1", port: 80 },
+                { name: "listener2", port: 8080 },
+              ],
+            },
+          ],
+          targetGroups: [
+            {
+              containerPort: 80,
+              listener: "listener1",
+            },
+            {
+              containerPort: 80,
+              listener: "listener2",
+            },
+          ],
+        }
+      );*/
+
     const fargateLoadBalancedService =
       new ecsPatterns.ApplicationLoadBalancedFargateService(
         this,
