@@ -98,6 +98,9 @@ class AwsEcsCdkStack extends Stack {
           loadBalancerName: "LoadBalancerEcsTeste",
           minHealthyPercent: 100,
           maxHealthyPercent: 200,
+          deploymentController: {
+            type: ecs.DeploymentControllerType.CODE_DEPLOY,
+          },
         }
       );
 
