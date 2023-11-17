@@ -271,14 +271,14 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Source
-    const codeStarConnection = new codestarconnections.CfnConnection(
+    /*const codeStarConnection = new codestarconnections.CfnConnection(
       this,
       "CodestarConnection",
       {
-        connectionName: "GitRepositoryConnection",
+        connectionName: "GitRepositoryConnectionEcsTeste",
         providerType: "GitHub",
       }
-    );
+    );*/
 
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction =
@@ -289,7 +289,7 @@ class AwsEcsCdkStack extends Stack {
         branch: "master",
         //        connectionArn: codeStarConnection.attrConnectionArn,
         connectionArn:
-          "arn:aws:codestar-connections:us-east-1:884588048908:connection/edb57b04-d802-447e-b543-685ddc50379b",
+          "arn:aws:codestar-connections:us-east-1:884588048908:connection/891bc702-0bcb-46ea-a1fc-8f1857cdf42f",
         output: sourceOutput,
       });
 
