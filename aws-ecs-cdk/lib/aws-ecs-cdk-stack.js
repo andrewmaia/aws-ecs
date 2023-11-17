@@ -10,6 +10,7 @@ const codebuild = require("aws-cdk-lib/aws-codebuild");
 const codepipeline = require("aws-cdk-lib/aws-codepipeline");
 const s3 = require("aws-cdk-lib/aws-s3");
 const codepipeline_actions = require("aws-cdk-lib/aws-codepipeline-actions");
+const codestarconnections = require("aws-cdk-lib/aws-codestarconnections");
 
 class AwsEcsCdkStack extends Stack {
   constructor(scope, id, props) {
@@ -270,15 +271,25 @@ class AwsEcsCdkStack extends Stack {
     });
 
     //Source
+    const codeStarConnection = new codestarconnections.CfnConnection(
+      this,
+      "CodestarConnection",
+      {
+        connectionName: "GitRepositoryConnection",
+        providerType: "GitHub",
+      }
+    );
+
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction =
       new codepipeline_actions.CodeStarConnectionsSourceAction({
         actionName: "SourceAction",
         owner: "andrewmaia",
         repo: "aws-ecs",
+        branch: "master",
+        //        connectionArn: codeStarConnection.attrConnectionArn,
         connectionArn:
           "arn:aws:codestar-connections:us-east-1:884588048908:connection/edb57b04-d802-447e-b543-685ddc50379b",
-
         output: sourceOutput,
       });
 
