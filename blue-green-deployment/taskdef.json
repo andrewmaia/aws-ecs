@@ -1,0 +1,35 @@
+{
+    "family": "ecs-teste-taskdefinition",
+    "containerDefinitions": [
+        {
+            "name": "ecs-teste-container",
+            "image": <IMAGE1_NAME>,
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "entryPoint": [
+                "sh",
+                "-c"
+            ],
+            "command": [
+                "/bin/sh -c \"echo $(hostname -i) >  /var/www/html/ipadress.txt && apache2-foreground\""
+            ],
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": []
+        }
+    ],
+    "executionRoleArn": "arn:aws:iam::884588048908:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
